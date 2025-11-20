@@ -1,11 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
+type RouteParams = {
+  params: Promise<{ code: string }>;
+};
+
 export async function GET(
   req: NextRequest,
-  context: { params: { code: string } }
+  props: RouteParams
 ) {
-  const { code } = context.params;
+  const params = await props.params;
+  const { code } = params;
 
   const link = await prisma.link.findUnique({
     where: { code },
@@ -15,7 +20,7 @@ export async function GET(
     return new NextResponse("Not Found", { status: 404 });
   }
 
-  // Update click count
+  // increment click count + last clicked time
   await prisma.link.update({
     where: { code },
     data: {
@@ -24,5 +29,5 @@ export async function GET(
     },
   });
 
-  return NextResponse.redirect(link.targetUrl);
+  return NextResponse.redirect(link.targetUrl, 302);
 }
