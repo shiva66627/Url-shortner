@@ -31,7 +31,7 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Error creating link:", error);
     return NextResponse.json(
-      { error: "Failed to create link" },
+      { error: error instanceof Error ? error.message : "Unknown error" },
       { status: 500 }
     );
   }
