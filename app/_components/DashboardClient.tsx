@@ -35,7 +35,8 @@ export default function DashboardClient() {
     setLoading(false);
 
     if (!res.ok) {
-      alert("Failed to create link");
+      const errorData = await res.json();
+      alert(errorData.error || "Failed to create link");
       return;
     }
 

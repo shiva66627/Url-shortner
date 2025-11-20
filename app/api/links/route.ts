@@ -9,24 +9,32 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-  const body = await req.json();
-  const { targetUrl } = body;
+  try {
+    const body = await req.json();
+    const { targetUrl } = body;
 
-  if (!targetUrl) {
-    return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    if (!targetUrl) {
+      return NextResponse.json({ error: "URL is required" }, { status: 400 });
+    }
+
+    // Auto-generate 6 character code
+    const code = Math.random().toString(36).substring(2, 8);
+
+    const newLink = await prisma.link.create({
+      data: {
+        code,
+        targetUrl,
+      },
+    });
+
+    return NextResponse.json(newLink);
+  } catch (error) {
+    console.error("Error creating link:", error);
+    return NextResponse.json(
+      { error: "Failed to create link" },
+      { status: 500 }
+    );
   }
-
-  // Auto-generate 6 character code
-  const code = Math.random().toString(36).substring(2, 8);
-
-  const newLink = await prisma.link.create({
-    data: {
-      code,
-      targetUrl,
-    },
-  });
-
-  return NextResponse.json(newLink);
 }
 
 export async function DELETE(req: Request) {
