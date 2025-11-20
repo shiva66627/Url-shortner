@@ -1,13 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 
-interface Params {
-  params: { code: string };
-}
+export async function GET(
+  req: NextRequest,
+  { params }: { params: { code: string } }
+) {
+  const { code } = params;
 
-export async function GET(_req: NextRequest, { params }: Params) {
   const link = await prisma.link.findUnique({
-    where: { code: params.code },
+    where: { code },
   });
 
   if (!link) {
@@ -17,18 +18,19 @@ export async function GET(_req: NextRequest, { params }: Params) {
   return NextResponse.json(link);
 }
 
-export async function DELETE(_req: NextRequest, { params }: Params) {
-  const link = await prisma.link.findUnique({
-    where: { code: params.code },
-  });
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { code: string } }
+) {
+  const { code } = params;
 
-  if (!link) {
+  try {
+    await prisma.link.delete({
+      where: { code },
+    });
+
+    return NextResponse.json({ ok: true });
+  } catch {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-
-  await prisma.link.delete({
-    where: { code: params.code },
-  });
-
-  return NextResponse.json({ ok: true });
 }
